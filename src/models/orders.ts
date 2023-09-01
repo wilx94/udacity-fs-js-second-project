@@ -44,20 +44,37 @@ export class OrderStore {
         }
     }
 
-    async show(id: string): Promise< Order > {
+    async showByUser(userId: string): Promise< Order > {
         try {
             const conn = await Client.connect()
 
-            const sql = `SELECT * FROM orders WHERE id = ($1)`
+            const orderSql = `
+                SELECT * FROM orders 
+                WHERE user_id = $1
+                AND STATUS = true
+                ORDER BY id DESC
+                LIMIT 1
+            `
 
-            const result = await conn.query(sql, [ id ])
+            const orderResult = await conn.query(orderSql, [ userId ])
+            const currentOrder = orderResult.rows[0]
 
-            conn.release()
-            console.log(result.rows[0])
+            const productsOrderSql = `
+                SELECT * FROM product_orders
+                WHERE order_id = $1
+            `
 
-            return result.rows[0]
+            const productsOrder = await conn.query(productsOrderSql, [currentOrder.id])
+            currentOrder.products = []
+
+            productsOrder.rows.forEach( productOrder => {
+                const { product_id: productId, qty } = productOrder
+                currentOrder.products.push({ productId, qty })
+            })
+
+            return currentOrder
         } catch (error) {
-            throw new Error(`Failed get order ${id} > Error: ${error}`)
+            throw new Error(`Failed get order ${userId} > Error: ${error}`)
         }
     }
 }

@@ -23,13 +23,13 @@ const createOrder = async (req: Request, res: Response) => {
     res.send(newOrder)
 }
 
-const showOrder = async (req: Request, res: Response) => {
+const showUserOrder = async (req: Request, res: Response) => {
     console.log('showing order')
     const {
-        params: { id }
+        params: { userId }
     } = req
 
-    const order = await store.show(id)
+    const order = await store.showByUser(userId)
 
     res.send(order)
 }
@@ -60,7 +60,7 @@ const index = async (_req: Request, res: Response) => {
 
 const orderRoutes = (app: express.Application) => {
     app.get('/orders', index)
-    app.get('/orders/:id', showOrder)
+    app.get('/orders/current/:userId', showUserOrder)
     app.post('/orders', createOrder)
 }
 
