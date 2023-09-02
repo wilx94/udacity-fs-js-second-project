@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express'
 import { BaseOrder, OrderStore } from '../models/orders'
+import { verifyAuthToken } from './utilities'
 
 const store = new OrderStore()
 
@@ -60,7 +61,7 @@ const index = async (_req: Request, res: Response) => {
 
 const orderRoutes = (app: express.Application) => {
     app.get('/orders', index)
-    app.get('/orders/current/:userId', showUserOrder)
+    app.get('/orders/current/:userId', verifyAuthToken, showUserOrder)
     app.post('/orders', createOrder)
 }
 

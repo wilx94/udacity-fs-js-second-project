@@ -1,11 +1,13 @@
 import express, { Request, Response } from 'express'
 import { BaseProduct, ProductStore } from '../models/products'
+import { verifyAuthToken } from './utilities'
 
 const store = new ProductStore()
 
 const createProduct = async (req: Request, res: Response) => {
     console.log('creating product')
 
+    
     const { 
         body: {
             name,
@@ -69,7 +71,7 @@ const index = async (_req: Request, res: Response) => {
 const productRoutes = (app: express.Application) => {
     app.get('/products', index)
     app.get('/products/:id', showProduct)
-    app.post('/products', createProduct)
+    app.post('/products', verifyAuthToken, createProduct)
 }
 
 export default productRoutes
