@@ -1,4 +1,5 @@
 import Client from "../database";
+import bcrypt from 'bcrypt'
 
 
 export interface BaseUser {
@@ -19,7 +20,11 @@ export class UserStore {
 
             const sql = `INSERT INTO users (first_name, last_name, password) VALUES ($1, $2, $3) RETURNING *`
 
-            const result = await conn.query(sql, [ firstName, lastName, password ])
+            const { BCRYPT_PASSWORD: pepper = '', SALT_ROUNDS: saltRounds = ''} = process.env
+
+            const hash = bcrypt.hashSync(password + pepper, parseInt(saltRounds))
+
+            const result = await conn.query(sql, [ firstName, lastName, hash ])
 
             conn.release()
 
